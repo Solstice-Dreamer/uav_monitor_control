@@ -1,0 +1,108 @@
+<root main_tree_to_execute="RemoteControl">
+  <BehaviorTree ID="RemoteControl">
+    <Parallel success_threshold="4" failure_threshold="4">
+
+      <!-- 监听并转发无人机状态 -->
+      <ListenStatus
+        position_port="{current_position}"
+        orientation_port="{current_orientation}"
+        battery_port="{current_battery}" />
+      <!-- 监听命令 -->
+      <ListenCommand cmd_map_port="{cmd_map}" />
+      <!-- 发布轨迹 -->
+      <PublishPoint target_position_port="{target_position}" />
+
+      <!-- 任务分发 -->
+      <Fallback name="TaskDispatcher">
+
+        <!-- 起飞任务 -->
+        <Sequence name="Start">
+          <!-- 检查是否匹配 -->
+          <CheckCommandName cmd_map_port="{cmd_map}" expected_port="start" />
+          <!-- 设置起飞目标点 -->
+          <SetTakeoffTarget
+            current_position_port="{current_position}"
+            cmd_map_port="{cmd_map}"
+            target_position_port="{target_position}" />
+
+          <!-- 记录当前位置作为home -->
+          <SetBlackboardPose key="home_position" value="{current_position}" />
+
+          <!-- 解锁 -->
+          <ArmDisarm arm="true" />
+          <!-- 切换offboard模式 -->
+          <SwitchToOffboardMode />
+
+        </Sequence>
+
+
+        <!-- 定点飞行 -->
+        <Sequence name="FlyToPoint">
+          <!-- 检查是否匹配 -->
+          <CheckCommandName cmd_map_port="{cmd_map}" expected_port="flytopoint" />
+          <SwitchToOffboardMode />
+          <!-- 设置定点飞行目标点 -->
+          <SetPointTarget
+            cmd_map_port="{cmd_map}"
+            target_position_port="{target_position}" />
+        </Sequence>
+
+
+        <!-- 原地降落任务 -->
+        <Sequence name="Land">
+          <!-- 检查是否匹配 -->
+          <CheckCommandName cmd_map_port="{cmd_map}" expected_port="land" />
+          <!-- 切换自动降落模式 -->
+          <LandAction />
+        </Sequence>
+
+
+        <!-- 返航任务 -->
+        <Sequence name="Return">
+          <!-- 检查是否匹配 -->
+          <CheckCommandName cmd_map_port="{cmd_map}" expected_port="return" />
+          <!-- 执行返航 -->
+          <ReturnToHome home_position_port="{home_position}" cmd_map_port="{cmd_map}" current_position_port="{current_position}" />
+          <!-- 接下来由定点飞行来控制无人机位置 -->
+
+        </Sequence>
+
+
+        <!-- 锁定 -->
+        <Sequence name="DisArm">
+          <!-- 检查是否匹配 -->
+          <CheckCommandName cmd_map_port="{cmd_map}" expected_port="disarm" />
+          <!-- 检查是否落地 -->
+          <CheckLanded />
+          <!-- 锁定 -->
+          <ArmDisarm arm="false" />
+        </Sequence>
+
+
+        <!-- 强制终止其它飞行任务 -->
+        <Sequence name="Stop">
+          <!-- 检查是否匹配 -->
+          <CheckCommandName cmd_map_port="{cmd_map}" expected_port="stop" />
+          <!-- 切换offboard模式 -->
+          <SwitchToOffboardMode />
+          <!-- 直接让无人机停在原地 -->
+          <SetBlackboardPose key="target_position" value="{current_position}" />
+        </Sequence>
+
+
+        <!-- 默认执行悬停（非强制，等待目前的任务执行完成） -->
+        <Sequence name="Hover">
+          <!-- 检查是否到达目标位置，如果到达执行悬停，距离阈值为0.1m -->
+
+          <CheckPositionReached current_position_port="{current_position}"
+            target_position_port="{target_position}" threshold="0.05" />
+          <!-- 设置目标位置为当前位置即可悬停 -->
+          <SetBlackboardPose key="target_position" value="{current_position}" />
+        </Sequence>
+
+      </Fallback>
+
+
+    </Parallel>
+  </BehaviorTree>
+</root>
