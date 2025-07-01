@@ -1,5 +1,8 @@
 #include "uav_monitor_control/ListenStatus.hpp"
 #include "uav_monitor_control/send_info.hpp"
+#include <fstream>
+#include <chrono>
+#include <filesystem>
 
 using namespace uav_monitor_control;
 
@@ -50,6 +53,26 @@ BT::NodeStatus ListenStatus::tick()
     pos_msg.x = p.x;
     pos_msg.y = p.y;
     pos_msg.z = p.z;
+    
+    // 更新本地文件夹中的当前位置
+
+    // 准备文件路径
+    std::string home_dir = std::getenv("HOME");
+    std::filesystem::path dir = home_dir + "/communication/path";
+    std::filesystem::create_directories(dir);
+    std::string current_point_file = (dir / ("current_point.txt")).string();
+
+    // 写入start_point点坐标
+    std::ofstream ofs(current_point_file);
+    if (!ofs)
+    {
+        RCLCPP_ERROR(node_->get_logger(), "current_point: failed to open points file");
+    }
+    else
+    {
+        ofs << p.x << " " << p.y << " " << p.z << "\n";
+        ofs.close();
+    }
 
     ori_msg.w = q.w;
     ori_msg.x = q.x;
@@ -81,4 +104,3 @@ BT::NodeStatus ListenStatus::tick()
 
     return BT::NodeStatus::SUCCESS;
 }
-

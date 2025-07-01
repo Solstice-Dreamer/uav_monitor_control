@@ -53,7 +53,6 @@ void PublishPoint::publishOnce(const geometry_msgs::msg::Point &target)
     setpoint_pub_->publish(msg);
 
     RCLCPP_INFO(node_->get_logger(),
-                "[PublishPoint] 发布 ENU 目标到 /mavros/setpoint_position/local: "
-                "x=%.2f, y=%.2f, z=%.2f",
+                "[PublishPoint] x=%.2f, y=%.2f, z=%.2f",
                 target.x, target.y, target.z);
 }

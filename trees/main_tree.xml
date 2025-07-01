@@ -19,15 +19,13 @@
         <Sequence name="Start">
           <!-- 检查是否匹配 -->
           <CheckCommandName cmd_map_port="{cmd_map}" expected_port="start" />
-          <!-- 设置起飞目标点 -->
+          <!-- 设置起飞目标点，同时在本地文件夹中记录start_point.txt -->
           <SetTakeoffTarget
             current_position_port="{current_position}"
             cmd_map_port="{cmd_map}"
             target_position_port="{target_position}" />
-
           <!-- 记录当前位置作为home -->
           <SetBlackboardPose key="home_position" value="{current_position}" />
-
           <!-- 解锁 -->
           <ArmDisarm arm="true" />
           <!-- 切换offboard模式 -->
@@ -40,11 +38,11 @@
         <Sequence name="FlyToPoint">
           <!-- 检查是否匹配 -->
           <CheckCommandName cmd_map_port="{cmd_map}" expected_port="flytopoint" />
-          <SwitchToOffboardMode />
           <!-- 设置定点飞行目标点 -->
           <SetPointTarget
             cmd_map_port="{cmd_map}"
             target_position_port="{target_position}" />
+          <SwitchToOffboardMode />
         </Sequence>
 
 
@@ -58,14 +56,14 @@
 
 
         <!-- 返航任务 -->
-        <Sequence name="Return">
+        <!-- <Sequence name="Return"> -->
           <!-- 检查是否匹配 -->
-          <CheckCommandName cmd_map_port="{cmd_map}" expected_port="return" />
+          <!-- <CheckCommandName cmd_map_port="{cmd_map}" expected_port="return" /> -->
           <!-- 执行返航 -->
-          <ReturnToHome home_position_port="{home_position}" cmd_map_port="{cmd_map}" current_position_port="{current_position}" />
+          <!-- <ReturnToHome home_position_port="{home_position}" cmd_map_port="{cmd_map}" -->
+            <!-- current_position_port="{current_position}" /> -->
           <!-- 接下来由定点飞行来控制无人机位置 -->
-
-        </Sequence>
+        <!-- </Sequence> -->
 
 
         <!-- 锁定 -->
@@ -83,17 +81,17 @@
         <Sequence name="Stop">
           <!-- 检查是否匹配 -->
           <CheckCommandName cmd_map_port="{cmd_map}" expected_port="stop" />
-          <!-- 切换offboard模式 -->
-          <SwitchToOffboardMode />
           <!-- 直接让无人机停在原地 -->
           <SetBlackboardPose key="target_position" value="{current_position}" />
+          <!-- 切换offboard模式 -->
+          <SwitchToOffboardMode />
         </Sequence>
 
 
         <!-- 默认执行悬停（非强制，等待目前的任务执行完成） -->
+        <!-- 默认分支会一直执行，因此不能写切换到offboard，不然会导致无人机在offboard模式下无法退出 -->
         <Sequence name="Hover">
-          <!-- 检查是否到达目标位置，如果到达执行悬停，距离阈值为0.1m -->
-
+          <!-- 检查是否到达目标位置，如果到达执行悬停，距离阈值为0.05m -->
           <CheckPositionReached current_position_port="{current_position}"
             target_position_port="{target_position}" threshold="0.05" />
           <!-- 设置目标位置为当前位置即可悬停 -->

@@ -1,4 +1,7 @@
 #include "uav_monitor_control/SetTakeoffTarget.hpp"
+#include <fstream>
+#include <chrono>
+#include <filesystem>
 
 using namespace uav_monitor_control;
 
@@ -12,13 +15,31 @@ SetTakeoffTarget::SetTakeoffTarget(const std::string &name,
 
 BT::NodeStatus SetTakeoffTarget::tick()
 {
-    // 1. 获取当前 ENU 位姿
+    // 1. 获取并记录当前 ENU 位姿
     geometry_msgs::msg::Point current;
     if (!getInput("current_position_port", current))
     {
         RCLCPP_ERROR(node_->get_logger(),
                      "[SetTakeoffTarget] missing current_position_port");
         return BT::NodeStatus::FAILURE;
+    }
+
+    // 准备文件路径
+    std::string home_dir = std::getenv("HOME");
+    std::filesystem::path dir = home_dir + "/communication/path";
+    std::filesystem::create_directories(dir);
+    std::string start_point_file = (dir / ("start_point.txt")).string();
+
+    // 写入start_point点坐标
+    std::ofstream ofs(start_point_file);
+    if (!ofs)
+    {
+        RCLCPP_ERROR(node_->get_logger(), "start_point: failed to open points file");
+    }
+    else
+    {
+        ofs << current.x << " " << current.y << " " << current.z << "\n";
+        ofs.close();
     }
 
     // 2. 获取命令字典
