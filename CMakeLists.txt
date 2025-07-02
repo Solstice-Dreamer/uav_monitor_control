@@ -14,17 +14,17 @@ project(uav_monitor_control)
 # 3. 查找依赖包
 # -------------------------------------------------
 # ament 和 ROS2 C++ 库
-find_package(ament_cmake          REQUIRED)
-find_package(rclcpp              REQUIRED)
+find_package(ament_cmake REQUIRED)
+find_package(rclcpp REQUIRED)
 find_package(behaviortree_cpp_v3 REQUIRED)
 
 # MAVROS 的消息／服务定义包
-find_package(mavros_msgs   REQUIRED)
+find_package(mavros_msgs REQUIRED)
 
 # MAVROS 里会用到的标准消息类型
 # find_package(std_msgs      REQUIRED)
 find_package(geometry_msgs REQUIRED)
-find_package(sensor_msgs   REQUIRED)
+find_package(sensor_msgs REQUIRED)
 
 # -------------------------------------------------
 # 4. 包含头文件目录
@@ -53,12 +53,13 @@ add_library(monitor_control_nodes
   src/CheckPositionReached.cpp
   src/SetBlackboard.cpp
   src/ReturnToHome.cpp
+  src/StopFollow.cpp
 )
 # 为该库添加依赖，自动设置 include 路径和链接库
 ament_target_dependencies(monitor_control_nodes
-  rclcpp                   # 提供 ROS 2 Node、Subscription 等接口
-  mavros_msgs                 # 提供 BatteryStatus 消息类型
-  behaviortree_cpp_v3      # 提供 BehaviorTree 演算法框架
+  rclcpp # 提供 ROS 2 Node、Subscription 等接口
+  mavros_msgs # 提供 BatteryStatus 消息类型
+  behaviortree_cpp_v3 # 提供 BehaviorTree 演算法框架
   std_msgs
   geometry_msgs
   sensor_msgs
@@ -88,16 +89,16 @@ target_link_libraries(bt_runner
 # -------------------------------------------------
 # 安装库和可执行文件到 lib/<project_name> 下
 install(TARGETS
-  monitor_control_nodes  # 自定义库
-  bt_runner               # 可执行程序
+  monitor_control_nodes # 自定义库
+  bt_runner # 可执行程序
   DESTINATION lib/${PROJECT_NAME}
 )
 
 # 安装资源目录（XML、launch 脚本）到 share/<project_name> 下
 install(
   DIRECTORY
-    trees   # 行为树 XML 定义
-    launch  # ROS2 launch 脚本
+  trees # 行为树 XML 定义
+  launch # ROS2 launch 脚本
   DESTINATION share/${PROJECT_NAME}
 )
 

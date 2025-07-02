@@ -57,12 +57,12 @@
 
         <!-- 返航任务 -->
         <!-- <Sequence name="Return"> -->
-          <!-- 检查是否匹配 -->
-          <!-- <CheckCommandName cmd_map_port="{cmd_map}" expected_port="return" /> -->
-          <!-- 执行返航 -->
-          <!-- <ReturnToHome home_position_port="{home_position}" cmd_map_port="{cmd_map}" -->
-            <!-- current_position_port="{current_position}" /> -->
-          <!-- 接下来由定点飞行来控制无人机位置 -->
+        <!-- 检查是否匹配 -->
+        <!-- <CheckCommandName cmd_map_port="{cmd_map}" expected_port="return" /> -->
+        <!-- 执行返航 -->
+        <!-- <ReturnToHome home_position_port="{home_position}" cmd_map_port="{cmd_map}" -->
+        <!-- current_position_port="{current_position}" /> -->
+        <!-- 接下来由定点飞行来控制无人机位置 -->
         <!-- </Sequence> -->
 
 
@@ -85,6 +85,14 @@
           <SetBlackboardPose key="target_position" value="{current_position}" />
           <!-- 切换offboard模式 -->
           <SwitchToOffboardMode />
+        </Sequence>
+
+        <!-- 停止follow -->
+        <Sequence name="StopFollow">
+          <!-- 检查是否匹配 -->
+          <CheckCommandName cmd_map_port="{cmd_map}" expected_port="stopfollow" />
+          <!-- 停止follow -->
+          <StopFollow />
         </Sequence>
 
 

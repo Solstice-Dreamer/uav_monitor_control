@@ -14,6 +14,7 @@
 #include "uav_monitor_control/SetBlackboard.hpp"
 #include "uav_monitor_control/CheckPositionReached.hpp"
 #include "uav_monitor_control/ReturnToHome.hpp"
+#include "uav_monitor_control/StopFollow.hpp"
 
 int main(int argc, char **argv)
 {
@@ -121,6 +122,12 @@ int main(int argc, char **argv)
         [node](const std::string &name, const BT::NodeConfiguration &config)
         {
             return std::make_unique<uav_monitor_control::ReturnToHome>(name, config, node);
+        });
+    factory.registerBuilder<uav_monitor_control::StopFollow>(
+        "StopFollow",
+        [node](const std::string &name, const BT::NodeConfiguration &config)
+        {
+            return std::make_unique<uav_monitor_control::StopFollow>(name, config, node);
         });
 
     // 6. 从XML文件创建行为树实例
